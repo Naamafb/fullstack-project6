@@ -1,0 +1,28 @@
+.TodoContainer {
+    display: flex;
+    flex-direction: column;
+    /* align-items: center; */
+    margin-left: 100px;
+    margin-top: 50px; /* Adjust the margin as per your preference */
+    margin-top: 90px;
+  }
+  
+  .TodoList {
+    width: 100px; /* Adjust the width as per your preference */
+  }
+  
+  .TodoList div {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px; /* Adjust the margin as per your preference */
+    white-space: nowrap; /* Prevent line breaks within a record */
+  }
+  
+  .TodoCheckbox {
+    margin-right: 10px; /* Adjust the margin as per your preference */
+  }
+  
+  .SortSelect {
+    margin-bottom: 20px; /* Adjust the margin as per your preference */
+  }
+  

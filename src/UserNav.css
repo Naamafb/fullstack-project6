@@ -1,0 +1,23 @@
+.nav-links {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: #ebe5dc;
+  display: flex;
+  list-style: none;
+  justify-content: space-around;
+  align-items: center;
+  padding: 0;
+  margin: 0;
+  z-index: 999; /* Ensure the navigation bar is above other elements */
+}
+
+.nav-links li {
+  margin: 0 2px;
+}
+
+/* Add margin to the top content */
+.top-content {
+  margin-top: 40px; /* Adjust the value to create enough space for the navigation */
+}
