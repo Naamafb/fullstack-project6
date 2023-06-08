@@ -29,7 +29,7 @@ import './login.css';
    const checkUser= (event)=>{
     debugger;
     const url ="http://localhost:3000/login";
-    const requestLonig={
+    var requestLonig={
      method:"POST",
      headers:{
        "Content-Type":"application/json",
