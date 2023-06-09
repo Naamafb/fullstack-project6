@@ -1,5 +1,18 @@
+// כל הקובץ הזה הוא חוכמתו הבלעדית של ה' יתברך ואין לי שום קרטית או חלק בכל אות ואות שנכבתה כאן, ובכלל
 const mysql = require('mysql2');
 const http = require('http');
+
+/*
+  Hi There!
+  Thanks for Choosing Us.
+  Steps For Activation:
+  1) check the password property to your password at line 106
+  2) if you HAVEN'T use the old file, just run the code and after that uncomment 109
+  3) if you do use the old file, uncomment line 109, and uncomment lines 123-134 (included)
+  and make a first run. after that comment lines 123-134 (included) and run again.
+  FINISH
+  Good-Luck
+ */
 
 const getDataJPH = async (path_name) => {
     const options = {
@@ -40,6 +53,47 @@ const getDataJPH = async (path_name) => {
     });
 };
 
+const addColumn = async (tableName, columnName, values, datatype) =>{
+
+      // Create the ALTER TABLE query to add the new column
+      const alterTableQuery = `ALTER TABLE ${tableName} ADD COLUMN ${columnName} ${datatype}`;
+
+      // Execute the ALTER TABLE query to add the new column
+      return await new Promise((resolve,reject) => {
+        con.query(alterTableQuery, (err) => {
+          if (err) throw err;
+          console.log(`Column '${columnName}' added successfully`);
+
+          // Loop through the values and insert them into the table
+          values.forEach((value, index) => {
+            const insertQuery = `UPDATE ${tableName} SET ${columnName} = ? WHERE id = ?`;
+
+            con.query(insertQuery, [value, index + 1], (err, result) => {
+              if (err) throw reject(err);
+              console.log(`Value '${value}' inserted successfully`);
+              resolve(result)
+            });
+          });
+        })
+      });
+}
+
+const modifyColumn = (tableName, columnName, signs) => {
+  const sql = `ALTER TABLE ${tableName} MODIFY ${columnName} ${signs.join(' ')}`
+  con.query(sql, (err, result) => {
+    if (err) throw err;
+    console.log(`Modify ${columnName} for table ${tableName} Successfully Done`);
+  });
+}
+
+const addForeignKey = (tableName, constraint_name, ColumnName,foreignTableName,foreignColumnName) => {
+  const sql = `ALTER TABLE ${tableName} ADD CONSTRAINT ${constraint_name} FOREIGN KEY (${ColumnName}) REFERENCES ${foreignTableName} (${foreignColumnName})`;
+  con.query(sql, (err, result) => {
+    if (err) throw err;
+    console.log('Foreign key constraint added successfully');
+  });
+}
+
 function generateRandomString(length) {
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   let randomString = '';
@@ -55,32 +109,35 @@ function generateRandomString(length) {
 var con = mysql.createConnection({
     host: "localhost",
     user: "root",
-    password: "324170521", // your password here
+    password: "324170521",
     port: 3306,
-    database: 'FullStackProject6' //- remove comment after first run
+    database: 'FullStackProject6'
   });
   
 con.connect(async function(err) {
     if (err) throw err;
     console.log("Connected!");
 
-    // con.query("CREATE DATABASE FullStackProject6", function (err, result) {
+    // con.query("SELECT api_key FROM users", function (err, result) {
     //   if (err) throw err;
-    //   console.log("Database created");
+    //   console.log(result);
     // });
+    // return;
     
-    var sql = "DROP TABLE IF EXISTS passwords";
-    con.query(sql, function (err, result) {
-        if (err) throw err;
-        console.log("Table deleted");
-    });
+    // con.query("DROP DATABASE FullStackProject6", function (err, result) {
+    //     if (err) throw err;
+    //     console.log("Database Dropped");
+    // });
 
     //Creating The database
+    // con.query("CREATE DATABASE FullStackProject6", function (err, result) {
+    //   if (err) throw err;
+    //   console.log("Database Created");
+    // });
 
-    
-   
+    //  return;
 
-    const convertTypes = {'number': 'INT','string':'VARCHAR(512)'}
+    const convertTypes = {'number': 'INT','string':'VARCHAR(511)','boolean':'BOOLEAN'}
     const tableNames = ['users','posts','todos','comments']
     // loop through the list:
     for (const tableName of tableNames){
@@ -93,7 +150,7 @@ con.connect(async function(err) {
         const instanceExample = data[0]
         Object.entries(instanceExample).forEach(([key, value]) => {
             const value_type = typeof(value)
-            if (value_type === 'number' || value_type === 'string')
+            if (value_type === 'number' || value_type === 'string' || value_type === 'boolean')
                 sql += `${key} ${convertTypes[value_type]},`
         });
         sql = sql.slice(0, -1) + ')';
@@ -107,13 +164,13 @@ con.connect(async function(err) {
         sql = `INSERT INTO ${tableName} (`
         Object.entries(instanceExample).forEach(([key, value]) => {
             const value_type = typeof(value)
-            if (value_type === 'number' || value_type === 'string')
+            if (value_type === 'number' || value_type === 'string'|| value_type === 'boolean' )
                 sql += `${key},`
         });
         sql = sql.slice(0, -1) + ') VALUES ?';
         // set values for the table
         const values = data.map((instance) => {
-            return Object.values(instance).filter(value => (typeof(value) === 'number' || typeof(value) === 'string'));
+            return Object.values(instance).filter(value => (typeof(value) === 'number' || typeof(value) === 'string' || typeof(value) === 'boolean'));
         })
         // make a query
         con.query(sql, [values], function (err, result) {
@@ -123,10 +180,10 @@ con.connect(async function(err) {
     }
 
     // Create user-password Table
-    con.query("SELECT id, username FROM users", function (err, result, fields) {
+    con.query("SELECT id, username FROM users", async function (err, result, fields) {
       if (err) throw err;
       result = result.map(value => { return {...value, password:generateRandomString(8)}})
-      let sql = "CREATE TABLE passwords (id INT, username VARCHAR(32), password VARCHAR(32))";
+      let sql = "CREATE TABLE passwords (id INT, username VARCHAR(511), password VARCHAR(32))";
       con.query(sql, function (err, result2) {
           if (err) throw err;
           
@@ -146,59 +203,49 @@ con.connect(async function(err) {
           });
       });
 
+      // Fix Signs To Columns
+
+      // modify id
+      tableNames.push('passwords');
+      const tablesVarchar = 'VARCHAR(511)';
+      const tablesInt = 'INT'
+
+      tableNames.forEach((tableName) => {
+        modifyColumn(tableName,'id',[tablesInt, 'AUTO_INCREMENT', 'PRIMARY KEY'])
+      });
+
+      // users
+      let tableName = 'users'
+      await addColumn(tableName,'`rank`',Array(10).fill('user'),'VARCHAR(20)')
+      await addColumn(tableName,'api_key',Array(10).fill().map(() => generateRandomString(20)),'VARCHAR(20)')
+      modifyColumn(tableName,'api_key',['VARCHAR(20)', 'UNIQUE', 'NOT NULL'])
+      modifyColumn(tableName,'username',[tablesVarchar, 'UNIQUE', 'NOT NULL'])
+      modifyColumn(tableName,'`rank`',['VARCHAR(20)', 'NOT NULL'])
+
+      // posts
+      tableName = 'posts'
+      Array( 'title', 'body').forEach((columnName) => modifyColumn(tableName,columnName, [tablesVarchar, 'NOT NULL']))
+      modifyColumn(tableName,'userId',[tablesInt, 'NOT NULL'])
+      addForeignKey(tableName,'postUserId','userId','users','id')
+
+      // todos
+      tableName = 'todos'
+      modifyColumn(tableName,'title',[tablesVarchar, 'NOT NULL'])
+      modifyColumn(tableName,'userId',[tablesInt, 'NOT NULL'])
+      modifyColumn(tableName,'completed',['BOOLEAN', 'NOT NULL', 'default 0'])
+      addForeignKey(tableName,'todosUserId','userId','users','id')
+
+      // comments
+      tableName = 'comments'
+      Array('name', 'body', 'email').forEach((columnName) => modifyColumn(tableName,columnName,[tablesVarchar, 'NOT NULL']))
+      modifyColumn(tableName, 'postId', [tablesInt,'NOT NULL'])
+      addForeignKey(tableName,'commentPostId','postId','posts','id')
+
+      // passwords
+      tableName = 'passwords'
+      modifyColumn(tableName,'password',['VARCHAR(32)','NOT NULL'])
+      addForeignKey(tableName,'userusername','username','users','username')
+
+      console.log('Wow! Everthing Is Up And Ready To Go!\nHappy Hacking!')
    });
-
-
-    // const sql = "CREATE TABLE customers (name VARCHAR(255), address VARCHAR(255))";
-    // const sql = "ALTER TABLE customers ADD COLUMN id INT AUTO_INCREMENT PRIMARY KEY";
-    // const sql = "INSERT INTO customers (name, address) VALUES ('koko', 'lala')";
-    // con.query(sql, function (err, result) {
-    //     if (err) throw err;
-    //     //console.log("Done");
-    //     console.log(result);
-    // });
-
-    // var sql = "INSERT INTO customers (name, address) VALUES ?";
-    // var values = [
-    //     ['John', 'Highway 71'],
-    //     ['Peter', 'Lowstreet 4'],
-    //     ['Viola', 'Sideway 1633']
-    //   ];
-    //   con.query(sql, [values], function (err, result) {
-    //     if (err) throw err;
-    //     console.log("Number of records inserted: " + result.affectedRows);
-    //   });
-
-    // con.query("SELECT * FROM users", function (err, result, fields) {
-    //     if (err) throw err;
-    //     console.log(result);
-    //  });
-
-    // var name = 'Amy';
-    // var adr = 'Mountain 21';
-    // var sql = 'SELECT * FROM customers WHERE name = ? OR address = ?';
-    // con.query(sql, [name, adr], function (err, result) {
-    //     if (err) throw err;
-    //     console.log(result);
-    // });
-
-    // var sql = "DROP TABLE IF EXISTS passwords";
-    // con.query(sql, function (err, result) {
-    //     if (err) throw err;
-    //     console.log("Table deleted");
-    // });
-
-    // var sql = "UPDATE customers SET address = 'Canyon 123' WHERE address = 'Valley 345'";
-    // con.query(sql, function (err, result) {
-    //     if (err) throw err;
-    //     console.log(result.affectedRows + " record(s) updated");
-    // });
-
-    //var sql = "SELECT * FROM customers LIMIT 5";
-    // var sql = "SELECT * FROM customers LIMIT 5 OFFSET 2";
-    // var sql = "SELECT * FROM customers LIMIT 2, 5"; // shortet varsion that do the same
-    // con.query(sql, function (err, result) {
-    //     if (err) throw err;
-    //     console.log(result);
-    // });
 });
