@@ -78,7 +78,7 @@ app.post("/register", function (req, res) {
     }
     console.log("Connected to database!");
 
-    const que = `SELECT * FROM users WHERE name = '${name}'`;
+    const que = `SELECT * FROM users WHERE username = '${userName}'`;
     console.log(que);
     con.query(que, (err, result) => {
       if (err) {
