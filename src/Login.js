@@ -25,43 +25,44 @@ import './login.css';
     setPassword(event.target.value);
    }
 
+   const signIn=()=>{
+    navigate("/register");
+   }
+
   
-   const checkUser= (event)=>{
+   const checkUser = (event) => {
     debugger;
-    const url ="http://localhost:3000/login";
-    var requestLonig={
-     method:"POST",
-     headers:{
-       "Content-Type":"application/json",
-     },
-     body:JSON.stringify({userName,password}),
-    }; 
-        event.preventDefault();
-        fetch(url,requestLonig)
-        .then((response) => {
-          if(response.status===200){
-            return response.json() 
-          }
-          else if(response.status===404){
-            throw ("The password or the user name aren't correct")
-          }
-        })
-        .then((data)=>data[0])
-        .then((user)=>{
-          var pass=user.address.geo.lat.slice(-4);
-          if(pass==password){
-            localStorage.setItem("user", JSON.stringify(user));
-            navigate(`/users/${user.id}/home`)
-          }
-          else{
-            alert("the password is incorrect")
-            setPassword("");
-          }
-        }).catch((error)=>{
-          setPassword("");
-          setUserName("");
-          alert(error)})  
-  }
+    const url = "http://localhost:3000/login";
+  
+    const requestLogin = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ userName, password }),
+    };
+  
+    fetch(url, requestLogin)
+      .then((response) => {
+        if (response.status === 200) {
+          return response.json();
+        } else if (response.status === 404) {
+          throw new Error("The password or the username is incorrect");
+        }
+      })
+      .then((user) => {
+        localStorage.setItem("user", JSON.stringify(user));
+        navigate(`/users/${user.id}/home`);
+      })
+      .catch((error) => {
+        setPassword("");
+        setUserName("");
+        alert(error.message);
+      });
+  
+    event.preventDefault();
+  };
+  
   
 
   
@@ -91,6 +92,7 @@ import './login.css';
          onBlur={handleBlur}
          />
     </form>
+    <button onClick={signIn}>Sign in</button>
     </div>
    )
 }

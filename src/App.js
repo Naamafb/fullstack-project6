@@ -8,7 +8,7 @@ import Photos from "./Photos.js"
 import Login from "./Login.js"
 import UserNav from "./UserNav.js"
 import Info from "./Info.js"
-
+import Register from "./Register"
 
 export default function App() {
   return (
@@ -25,6 +25,7 @@ export default function App() {
         </Route>      
         
         <Route path="users/:userid/albums/:albumId/photos" element={<Photos/>}/>
+        <Route path="/register" element={<Register/>}/>
 
       </Routes>
     </BrowserRouter>
