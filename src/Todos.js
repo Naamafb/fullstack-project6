@@ -8,7 +8,19 @@ function Todos() {
 
   const [todos, setTodos] = useState([]);
   const [findTodos, setFindTodos] = useState(true);
+  const [currentTodo,setCurrentTodo]=useState();
+
   
+
+
+  const clickedTodo = (todoId) => {
+    if(currentTodo===todoId){
+      setCurrentTodo(null)
+      return;
+    }
+    setCurrentTodo(todoId)
+
+}
   const handleCheckboxChange = (todoId) => {
     const updatedTodos = todos.map((todo) =>{
       if (todo.id === todoId) {
@@ -36,6 +48,19 @@ function Todos() {
 
   };
 
+  const deleteTodo = () =>{
+   
+    const updatedTodos = todos.map((todo) =>{
+      if (todo.id === currentTodo) {
+        return { ...todo, deleted: !todo.deleted };
+      }
+      return todo;
+    });
+    setTodos(updatedTodos);
+    localStorage.setItem("todosList", JSON.stringify(updatedTodos));
+
+  }
+
   useEffect(() => {
     var todosFromLocal=JSON.parse(localStorage.getItem("todosList"))
     if(Array.isArray(todosFromLocal)){
@@ -43,11 +68,20 @@ function Todos() {
       setFindTodos(true);
     }
     else{
-     fetch(`https://jsonplaceholder.typicode.com/todos?userId=${userid}`)
+      const url = `http://localhost:3000/users/${userid}/todos`;
+    
+      const requestTodos = {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        }
+      };
+     fetch(url,requestTodos)
       .then((response) => response.json())
       .then((data) => {
-        setTodos(data);
-        localStorage.setItem("todosList", JSON.stringify(data));
+        const sortesTodos=[...data].sort((a, b) => a.id - b.id);
+        setTodos(sortesTodos);
+        localStorage.setItem("todosList", JSON.stringify(sortesTodos));
       })
       .catch(() => setFindTodos(false))
     }
@@ -55,12 +89,30 @@ function Todos() {
    
 
   if (findTodos) {
-    let todosHtml = todos.map((todo) => (
-        <div key={todo.id}>
-            <input checked={todo.completed} onChange={() => handleCheckboxChange(todo.id)} type="checkbox"/>
-            <label>{todo.title}</label>
-        </div>
-    ));
+    let todosHtml = todos.map((todo) =>{
+      if(todo.deleted===0){
+        return(
+            <div key={todo.id}>
+              <input checked={todo.completed} onChange={() => handleCheckboxChange(todo.id)} type="checkbox"/>
+              <button className={ todo.id === currentTodo?'selectedTodo':'todo'} key={todo.id} onClick={() => clickedTodo(todo.id)}>
+              <label>{todo.id}. {todo.title}</label>
+              </button>
+
+
+              <div  style={{ visibility: todo.id === currentTodo ? 'visible' : 'collapse',display:todo.id === currentTodo ? 'flex' : 'none' }}>
+                  <button onClick={deleteTodo}> 
+                    delete todo
+                  </button> 
+              <div/>
+            </div>
+
+
+            
+          </div>
+        )
+      }
+      return null;
+  });
     return (
       <div className="TodoContainer">
         <div>

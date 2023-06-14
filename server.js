@@ -56,7 +56,7 @@ app.post("/login", function (req, res) {
 });
 
 
-var numOfUsers;
+
 
 // register
 app.post("/register", function (req, res) {
@@ -113,6 +113,45 @@ app.post("/register", function (req, res) {
     });
   });
 });
+
+//user todos 
+
+app.get(`/users/:userid/todos`, function (req, res) {
+  const userid=req.params.userid;
+
+  const con = mysql.createConnection({
+    host: "localhost",
+    user: "root",
+    password: "324170521", // your password here
+    port: 3306,
+    database: "FullStackProject6", // remove comment after first run
+  });
+
+  con.connect(function (err) {
+    if (err) {
+      console.error("Error connecting to database:", err);
+      return;
+    }
+    console.log("Connected to database!");
+
+    const que = `SELECT * FROM todos WHERE userId = '${userid}'`;
+    console.log(que);
+    con.query(que, (err, result) => {
+      if (err) {
+        console.log("Error executing the query:", err);
+        return;
+      }
+      console.log(result.length)
+      res.status(200).json(result)
+
+        con.end();
+      });
+    });
+  });
+
+
+
+
 
 
 app.listen(3000, () => {
