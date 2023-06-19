@@ -3,8 +3,14 @@ import "./UserNav.css"
 
 export function UserNav() {
   const handleLogout =()=> {
-    localStorage.removeItem("user")
-    localStorage.removeItem("todosList")
+    localStorage.removeItem("currentUser")
+    localStorage.removeItem("todosList");
+    localStorage.removeItem("postsList");
+    for (let key in localStorage) {
+      if (key.startsWith('commentsForPostId')) {
+        localStorage.removeItem(key);
+      }
+    }
   };
   var userJson=localStorage.getItem("user");
   var user=JSON.parse(userJson)

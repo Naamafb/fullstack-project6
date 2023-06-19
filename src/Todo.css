@@ -1,28 +1,80 @@
+/* Todo.css */
+
 .TodoContainer {
-    display: flex;
-    flex-direction: column;
-    /* align-items: center; */
-    margin-left: 100px;
-    margin-top: 50px; /* Adjust the margin as per your preference */
-    margin-top: 90px;
-  }
-  
-  .TodoList {
-    width: 100px; /* Adjust the width as per your preference */
-  }
-  
-  .TodoList div {
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px; /* Adjust the margin as per your preference */
-    white-space: nowrap; /* Prevent line breaks within a record */
-  }
-  
-  .TodoCheckbox {
-    margin-right: 10px; /* Adjust the margin as per your preference */
-  }
-  
-  .SortSelect {
-    margin-bottom: 20px; /* Adjust the margin as per your preference */
-  }
-  
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.SortSelect {
+  margin-bottom: 10px;
+}
+
+.todo-item {
+  margin-bottom: 10px;
+}
+
+.todo-checkbox {
+  margin-left: 10px;
+}
+
+.todo,
+.selectedTodo {
+  display: flex;
+  align-items: center;
+  padding: 5px 10px;
+  border: none;
+  background-color: #f5f5f5;
+  color: #333;
+  cursor: pointer;
+}
+
+.selectedTodo {
+  background-color: #ccc;
+}
+
+.todo-label {
+  margin-right: 5px;
+}
+
+.todo-input {
+  width: 300px;
+  padding: 5px;
+  border: 1px solid #ccc;
+}
+
+.delete-button,
+.update-button {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.add.todo {
+  display: flex;
+  align-items: center;
+}
+
+.add.todo input {
+  padding: 5px;
+  border: none;
+}
+
+.add.todo button {
+  padding: 5px 10px;
+  background-color: transparent;
+  border: 1px solid #000;
+  margin-left: 10px;
+}
+
+.todo-input-container {
+  display: flex;
+  align-items: center;
+}
+
+.todo-input-container input[type="checkbox"] {
+  order: 1;
+  margin-right: 10px;
+}
