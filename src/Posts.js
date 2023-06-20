@@ -12,6 +12,8 @@ function Posts() {
   const [selectedComments,setSelectedComments]=useState(null)
   const [newPostTitle,setNewPostTitle]=useState("")
   const [newPostBody,setNewPostBody]=useState("")
+  const [isEditing,setIsEditing]=useState(false);
+  const [editingComment, setEditingComment] = useState(null);
 
   
    const selectedPost = (postId) => {
@@ -97,11 +99,26 @@ const deleteComment = (commentId) => {
       if (response.status === 200) {
         console.log('Comment deleted successfully');
         setCurrentComments(
-          updatedComments.filter((comment) => comment.deleted === 0).map((comment) => (
+          commentsFromLocal.filter((comment) => comment.deleted === 0).map((comment) => (
             <div key={comment.id}>
-              <h3>{comment.name}</h3>
-              <p>{comment.body}</p>
-              <button   className="deleteButton" onClick={() => deleteComment(comment.id)}>delete comment</button>
+              {editingComment === comment.id ? (
+                <div>
+                  <input type="text" value={comment.name} onChange={(e) => handleCommentNameChange(comment.id, e.target.value)} />
+                  <textarea value={comment.body} onChange={(e) => handleCommentBodyChange(comment.id, e.target.value)}></textarea>
+                  <button onClick={() => saveEditedComment(comment.id)}>Save</button>
+                </div>
+              ) : (
+                <div>
+                  <h3>{comment.name}</h3>
+                <p>{comment.body}</p>
+                {editingComment !== null ? (
+                    <button disabled>Edit</button>
+                  ) : (
+                    <button onClick={() => editComment(comment.id)}>Edit</button>
+                )}
+                <button onClick={() => deleteComment(comment.id)}>Delete</button>
+                </div>
+              )}
             </div>
           ))
         );
@@ -126,16 +143,8 @@ const displayComments = () => {
   const commentsFromLocal = JSON.parse(localStorage.getItem(`commentsForPostId=${currentPost}`));
   
   if (Array.isArray(commentsFromLocal)) {
-    setCurrentComments(
-      commentsFromLocal.filter((comment) => comment.deleted === 0).map((comment) => (
-        <div key={comment.id}>
-          <h3>{comment.name}</h3>
-          <p>{comment.body}</p>
-          <button onClick={() => deleteComment(comment.id)}>delete comment</button>
-        </div>
-      ))
-    );
-    console.log(currentComments);
+    setCurrentComments(commentsFromLocal);
+    console.log(currentComments)
     setSelectedComments(currentPost);
   } else {
     const url = `http://localhost:3000/users/${userid}/posts/${currentPost}`;
@@ -151,20 +160,12 @@ const displayComments = () => {
       .then((response) => response.json())
       .then((data) => {
         if(data===null){
-          setSelectedComments(<div><p>there is no comments</p></div>)
+          setSelectedComments(currentPost)
           return;
         }
         const updatedComments = data.filter((comment) => comment.deleted === 0);
         localStorage.setItem(`commentsForPostId=${currentPost}`, JSON.stringify(updatedComments));
-        setCurrentComments(
-          updatedComments.map((comment) => (
-            <div key={comment.id}>
-              <h3>{comment.name}</h3>
-              <p>{comment.body}</p>
-              <button onClick={() => deleteComment(comment.id)}>delete comment</button>
-            </div>
-          ))
-        );
+        setCurrentComments(updatedComments);
         setSelectedComments(currentPost);
       })
       .catch(() => setCurrentComments("There aren't any comments"));
@@ -199,6 +200,100 @@ const deletePost = () =>{
     });
 
 }
+const handleSaveClick = () =>{
+  const url = `http://localhost:3000/users/${userid}/posts/${currentPost}`;
+
+    const requestEditPost = {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ title: newPostTitle, body: newPostBody }),
+    };
+
+    fetch(url, requestEditPost)
+      .then((response) => {
+        const updatedPosts = posts.map((post) => {
+          if (post.id === currentPost) {
+            return { ...post, title: newPostTitle, body: newPostBody };
+          }
+          return post;
+        });
+        setPosts(updatedPosts);
+        localStorage.setItem('postsList', JSON.stringify(updatedPosts));
+        setNewPostTitle('');
+        setNewPostBody('');
+        setIsEditing(false);
+      })
+      .catch(() => {
+        console.log('Error editing post');
+      });
+
+}
+const handleEditClick = (postId,postTitle,postBody)=>{
+  debugger
+    setCurrentPost(postId);
+    setNewPostTitle(postTitle);
+    setNewPostBody(postBody);
+    setIsEditing(true);
+}
+
+const editComment = (commentId) => {
+  setEditingComment(commentId);
+};
+
+const handleCommentNameChange = (commentId, value) => {
+  const updatedComments = currentComments.map((comment) => {
+    if (comment.id === commentId) {
+      return { ...comment, name: value };
+    }
+    return comment;
+  });
+  setCurrentComments(updatedComments);
+    
+};
+
+const handleCommentBodyChange = (commentId, value) => {
+  const commentsFromLocal = JSON.parse(localStorage.getItem(`commentsForPostId=${currentPost}`));
+  const updatedComments = commentsFromLocal.map((comment) => {
+    if (comment.id === commentId) {
+      return { ...comment, body: value };
+    }
+    return comment;
+  });
+ 
+  setCurrentComments(updatedComments);
+};
+
+const saveEditedComment = (commentId) => {
+  const url = `http://localhost:3000/users/${userid}/posts/${currentPost}/comments/${commentId}`;
+  const comment = currentComments.find((comment) => comment.id === commentId);
+  const commentName=comment.name;
+  const commentBody=comment.body;
+  const requestEditComment = {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({commentName,commentBody}),
+  };
+
+  fetch(url, requestEditComment)
+    .then((response) => {
+      if (response.status === 200) {
+        console.log('Comment edited successfully');
+        setEditingComment(null);
+        localStorage.setItem(`commentsForPostId=${currentPost}`, JSON.stringify(currentComments));
+      } else {
+        console.log('Failed to edit comment');
+      }
+    })
+    .catch((error) => {
+      console.error('An error occurred:', error);
+    });
+};
+
+
   
 
   if (findPosts) {
@@ -207,21 +302,64 @@ const deletePost = () =>{
         return(
           <div key={post.id}>
           <button className={ post.id === currentPost?'selectedPost':'post'} key={post.id} onClick={() => selectedPost(post.id)}>
-          <h3>{post.title}</h3>
-          <p>{post.body}</p>
+          
+            {isEditing && currentPost === post.id ? (
+              <div>
+                <input type="text" value={newPostTitle} onChange={handleNewPostTitle} />
+                <textarea value={newPostBody} onChange={handleNewPostBody}></textarea>
+              </div>
+            ) : (
+              <div>
+                <h3>{post.title}</h3>
+                <p>{post.body}</p>
+              </div>
+            )}
           </button>
           
           <div className='postButtons' style={{ visibility: post.id === currentPost ? 'visible' : 'collapse', display: post.id === currentPost ? 'flex' : 'none' }}>
+          {isEditing && currentPost === post.id ? (
+            <button onClick={handleSaveClick}>Save</button>
+            ) : (
+                <button onClick={() => handleEditClick(post.id, post.title, post.body)}>
+                  Edit Post
+                </button>
+            )}
             <button className="delete-button" onClick={deletePost}>
-              delete
+              Delete Post
             </button>
           </div>
           <div className='postButtons' style={{ visibility: post.id === currentPost ? 'visible' : 'collapse',display:post.id === currentPost ? 'flex' : 'none' }}>
             <button onClick={displayComments}> 
-              comments
+              Show comments
             </button> 
             <div style={{ visibility: post.id === selectedComments ? 'visible' : 'collapse', display: post.id === selectedComments ? 'flex' : 'none' }}>
-              {currentComments && <div>{currentComments}</div>}
+              {currentComments.length>0 ?
+                (currentComments.map((comment) => (
+                  <div key={comment.id}>
+                    {editingComment === comment.id ? (
+                      <div>
+                        <input type="text" value={comment.name} onChange={(e) => handleCommentNameChange(comment.id, e.target.value)} />
+                        <textarea value={comment.body} onChange={(e) => handleCommentBodyChange(comment.id, e.target.value)}></textarea>
+                        <button onClick={() => saveEditedComment(comment.id)}>Save</button>
+                      </div>
+                    ) : (
+                      <div>
+                        <h3>{comment.name}</h3>
+                        <p>{comment.body}</p>
+                        {editingComment !== null ? (
+                            <button disabled>Edit </button>
+                          ) : (
+                            <button onClick={() => editComment(comment.id)}>Edit comment</button>
+                        )}
+                        <button onClick={() => deleteComment(comment.id)}>Delete comment</button>
+                      </div>
+                    )}
+                  </div>
+                ))):
+                (<p>there is no comments to this post</p>)
+              }
+              {/* {currentComments&& <div>{currentComments}</div>} */}
+              
             </div>
           </div>
           </div>

@@ -310,6 +310,41 @@ app.get(`/users/:userid/posts`, function (req, res) {
     });
   });
 
+  //update post
+app.put(`/users/:userid/posts/:postId`, function (req, res) {
+  const {postId}=req.params;
+  const {title,body}=req.body;
+
+  const con = mysql.createConnection({
+    host: "localhost",
+    user: "root",
+    password: "324170521", // your password here
+    port: 3306,
+    database: "FullStackProject6", // remove comment after first run
+  });
+
+  con.connect(function (err) {
+    if (err) {
+      console.error("Error connecting to database:", err);
+      return;
+    }
+    console.log("Connected to database!");
+    
+    console.log(`${postId} ${title} ${body}`);
+    const query = `UPDATE posts SET body = '${body}' ,  title = '${title}'  WHERE id = ${postId}`;
+    console.log(query)
+    con.query(query, (err, result) => {
+      if (err) {
+        console.log("Error executing the query:", err);
+        return;
+      }
+      console.log("the post updated");
+      res.status(200).send("the post was updated")
+        con.end();
+      });
+    });
+  });
+
 //get comments for post
   app.get(`/users/:userid/posts/:postid`, function (req, res) {
     const postid=req.params.postid;
@@ -344,6 +379,42 @@ app.get(`/users/:userid/posts`, function (req, res) {
         });
       });
     });
+
+
+ //update comment   
+app.put(`/users/:userid/posts/:postId/comments/:commentId`, function (req, res) {
+  const {commentId}=req.params;
+  const {commentName,commentBody}=req.body;
+
+  const con = mysql.createConnection({
+    host: "localhost",
+    user: "root",
+    password: "324170521", // your password here
+    port: 3306,
+    database: "FullStackProject6", // remove comment after first run
+  });
+
+  con.connect(function (err) {
+    if (err) {
+      console.error("Error connecting to database:", err);
+      return;
+    }
+    console.log("Connected to database!");
+    
+    console.log(`${commentId} ${commentName} ${commentBody}`);
+    const query = `UPDATE comments SET name = '${commentName}' ,  body = '${commentBody}'  WHERE id = ${commentId}`;
+    console.log(query)
+    con.query(query, (err, result) => {
+      if (err) {
+        console.log("Error executing the query:", err);
+        return;
+      }
+      console.log("the comment updated");
+      res.status(200).send("the post was updated")
+        con.end();
+      });
+    });
+  });
 
 //add post for user
   app.post(`/users/:userId/posts`, function (req, res) {
