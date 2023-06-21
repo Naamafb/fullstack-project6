@@ -3,7 +3,7 @@ import "./UserNav.css"
 
 export function UserNav() {
   const handleLogout =()=> {
-    localStorage.removeItem("currentUser")
+    localStorage.removeItem("user")
     localStorage.removeItem("todosList");
     localStorage.removeItem("postsList");
     for (let key in localStorage) {
@@ -28,9 +28,6 @@ export function UserNav() {
           </li>
           <li>
             <Link to={`/users/${user.id}/posts`}>Posts</Link>
-          </li>
-          <li>
-            <Link to={`/users/${user.id}/albums`}>Albums</Link>
           </li>
           <li>
             <Link to={`/users/${user.id}/info`}>Info</Link>

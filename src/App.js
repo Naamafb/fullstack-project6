@@ -18,13 +18,10 @@ export default function App() {
         <Route path="/login" element={<Login/>} />
         <Route path="/users/:userid" element={<UserNav/>}> 
           <Route path="home" element={<Home/>}/>
-          <Route path="albums" element={<Albums />}/>
           <Route path="todos" element={<Todos/>}/>
           <Route path="posts" element={<Posts/>} />
           <Route path="info" element={<Info/>} />
         </Route>      
-        
-        <Route path="users/:userid/albums/:albumId/photos" element={<Photos/>}/>
         <Route path="/register" element={<Register/>}/>
 
       </Routes>

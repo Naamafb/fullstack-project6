@@ -499,6 +499,53 @@ app.delete(`/users/:userId/posts/:postId`, function (req, res) {
     });
   });
 
+//add comment
+  app.post(`/users/:userId/posts/:postId`, function (req, res) {
+
+    const {postId}=req.params;
+    const {newPostTitle,newPostBody,userEmail}=req.body;
+    console.log(`${newPostTitle} ${newPostBody} ${userEmail}`);
+  
+    const con = mysql.createConnection({
+      host: "localhost",
+      user: "root",
+      password: "324170521", // your password here
+      port: 3306,
+      database: "FullStackProject6", // remove comment after first run
+    });
+  
+    con.connect(function (err) {
+      if (err) {
+        console.error("Error connecting to database:", err);
+        return;
+      }
+      console.log("Connected to database!");
+      
+      
+      const query=`INSERT INTO comments (postId,name,email,body) VALUES ('${postId}','${newPostTitle}','${userEmail}','${newPostBody}')`;
+      console.log(query)
+      con.query(query, (err, result) => {
+        if (err) {
+          console.log("Error executing the query:", err);
+          return;
+        }
+        console.log("there is new comment in the database");
+        const queGet=`SELECT * FROM comments WHERE postId = ${postId}`
+        console.log(queGet);
+        con.query(queGet, (err, result) => {
+          if (err) {
+            console.log("Error executing the query:", err);
+            return;
+          }
+          console.log(result.length);
+          return res.status(200).json(result) 
+          });
+          con.end();
+        });
+        
+      });
+  });
+    
 //delete comment
   app.delete(`/users/:userId/posts/:postId/comments/:commentId`, function (req, res) {
 
