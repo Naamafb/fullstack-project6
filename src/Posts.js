@@ -339,7 +339,7 @@ function Posts() {
               <button className="add-comment" onClick={addComment}>Add comment</button>
             </div>
             <div className='postButtons' style={{ visibility: post.id === currentPost ? 'visible' : 'collapse',display:post.id === currentPost ? 'flex' : 'none' }}>
-              <button onClick={displayComments}> 
+              <button className='showCommentsButton'  onClick={displayComments}> 
                 Show comments
               </button> 
               <div style={{ visibility: post.id === selectedComments ? 'visible' : 'collapse', display: post.id === selectedComments ? 'flex' : 'none' }}>
