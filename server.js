@@ -439,7 +439,7 @@ app.put(`/users/:userid/posts/:postId/comments/:commentId`, function (req, res) 
       console.log("Connected to database!");
       
       
-      const query=`INSERT INTO posts (userId,title,body) VALUES ('${userId}','${newPostTitle}','${newPostBody}')`;
+      const query=`INSERT INTO posts (userId,title,body,deleted) VALUES ('${userId}','${newPostTitle}','${newPostBody}',0)`;
       console.log(query)
       con.query(query, (err, result) => {
         if (err) {

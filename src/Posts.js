@@ -47,9 +47,10 @@ function Posts() {
           .then((response) => response.json())
           .then((data) => {
             const sortedPosts = [...data].sort((a, b) => a.id - b.id);
+            debugger;
             console.log(sortedPosts);
             setPosts(sortedPosts);
-            localStorage.setItem('PostsList', JSON.stringify(sortedPosts));
+            localStorage.setItem('postsList', JSON.stringify(sortedPosts));
             setNewPostTitle("");
             setNewPostBody("");
           })
@@ -197,7 +198,7 @@ function Posts() {
         if (response.status===200) {
           console.log('Post deleted successfully');
           setPosts(updatedPosts);
-          localStorage.setItem('todosList', JSON.stringify(updatedPosts));
+          localStorage.setItem('postsList', JSON.stringify(updatedPosts));
         } else {
           console.log('Failed to delete post');
         }
